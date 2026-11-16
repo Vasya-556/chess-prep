@@ -1,3 +1,4 @@
+import Board from "../../components/board/Board";
 import styles from "./Home.module.css";
 import { useState } from "react";
 
@@ -43,18 +44,7 @@ function Home() {
         }
       </div>
       <div>
-        {(() => {
-          let result = [];
-
-          for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 8; j++) {
-              result.push(<div style={{"display": "inline-block", "backgroundColor": ((i+j)%2 === 0 ? "red" : "green"), "width": "50px", "height": "50px"}}></div>)
-            }
-            result.push(<br/>)
-          }
-
-          return result;
-        })()}
+        <Board/>
       </div>
     </div>
   )
