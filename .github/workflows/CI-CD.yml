@@ -22,10 +22,10 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
       
-      # - name: Frontend testing
-      #   working-directory: frontend
-      #   run: |
-      #     npm ci
+      - name: Frontend testing
+        working-directory: frontend
+        run: |
+          npm ci
       #     npm test -- --run
       
       - name: Frontend deploy
