@@ -34,6 +34,9 @@ jobs:
           git remote set-url origin https://git:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
           npm run deploy
     env: 
+      # CI-CD
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
       # frontend
       # VITE_BACKEND_URL: ${{ vars.VITE_BACKEND_URL }}
       VITE_IS_PRODUCTION: ${{ vars.VITE_IS_PRODUCTION }}
