@@ -127,7 +127,7 @@ function Board() {
           board[i][j].type === "none"
             ? ""
             : <img
-              src={`${appConfig.isProd ? "chess-prep" : ""}/assets/${board[i][j].color}_${board[i][j].type}.svg`}
+              src={`${appConfig.isProd ? "" : "chess-prep"}/assets/${board[i][j].color}_${board[i][j].type}.svg`}
               // src={"chess-prep/assets/" + board[i][j].color + "_" + board[i][j].type + ".svg"}
               width="30px"
               height="30px"

@@ -1,6 +1,6 @@
 const appConfig = {
     backendURL: import.meta.env.VITE_BACKEND_URL,
-    isProd: import.meta.env.VITE_IS_PRODUCTION,
+    isProd: import.meta.env.VITE_IS_PRODUCTION === "true",
 }
 
 export {
