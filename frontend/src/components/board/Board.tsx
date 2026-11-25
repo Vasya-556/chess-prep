@@ -23,6 +23,7 @@ function Board() {
   const initialBoard = useMemo(() => chessEngine.generateBoard(), []);
   const [activeLineIndex, setActiveLineIndex] = useState<number>(0);
   const [historyBoard, setHistoryBoard] = useState<chessTypes.Piece[][]>(initialBoard);
+  const [boardFlip, setBoardFlip] = useState<"white" | "black">("white");
   const enPassantTarget = useRef<[number, number] | null>(null);
   const castlingRights = useRef({
     whiteKingMoved: false,
@@ -50,7 +51,9 @@ function Board() {
 
   const displayBoard = (board: chessTypes.Piece[][]) => {
     const result = [];
-    for (let i = 0; i < board.length; i++) {
+    for (let i = boardFlip === "white" ? 0 : board.length - 1; 
+      boardFlip === "white" ? i < board.length : i >= 0;
+      boardFlip === "white" ? i++ : i--) {
       const row = board[i]; 
       result.push(<div 
         style={{"display": "inline-flex",
@@ -61,7 +64,9 @@ function Board() {
           "alignItems": "center",
         }}
       >{Math.abs(8 - i)}</div>);
-      for (let j = 0; j < row.length; j++) {
+      for (let j = boardFlip === "white" ? 0 : board.length - 1;
+        boardFlip === "white" ? j < row.length : j >= 0; 
+        boardFlip === "white" ? j++ : j--) {
         const isSelected = selectedSquare?.row === i && selectedSquare?.col === j;
         const isLegalDestination = selectedLegalMoves.some((move) => {
           return move.to[0] === i && move.to[1] === j;
@@ -77,6 +82,7 @@ function Board() {
             "height": "50px",
             "justifyContent": "center",
             "alignItems": "center",
+            "border": "1px solid black",
           }}>{
           board[i][j].type === "none"
             ? ""
@@ -99,7 +105,9 @@ function Board() {
         "alignItems": "center",
       }}
     ></div>);
-    for (let i = 0; i <= 7; i++) {
+    for (let i = boardFlip === "white" ? 0 : board.length - 1; 
+      boardFlip === "white" ? i < board.length : i >= 0;
+      boardFlip === "white" ? i++ : i--) {
       const abc = "abcdefgh";
       result.push(<div
         style={{"display": "inline-flex",
@@ -211,7 +219,7 @@ function Board() {
     return position
   }
 
-  const goPrevious = (e? :React.BaseSyntheticEvent) => {
+  const handleGoPrevious = (e? :React.BaseSyntheticEvent) => {
     e?.preventDefault();
 
     if (historyIndex > 0) {
@@ -223,7 +231,7 @@ function Board() {
     }
   }
 
-  const goNext = (e? :React.BaseSyntheticEvent) => {
+  const handleGoNext = (e? :React.BaseSyntheticEvent) => {
     e?.preventDefault();
     
     if (historyIndex < history[activeLineIndex].moves.length) {
@@ -295,7 +303,7 @@ function Board() {
     return result;
   }
 
-  const selectLine = (history: chessTypes.HistoryLine[], initialBoard: chessTypes.Piece[][] , activeLineIndex: number, selectedLineIndex: number, historyIndex: number) => {
+  const handleSelectLine = (history: chessTypes.HistoryLine[], initialBoard: chessTypes.Piece[][] , activeLineIndex: number, selectedLineIndex: number, historyIndex: number) => {
     if (selectedLineIndex === activeLineIndex){
       return
     }
@@ -323,10 +331,17 @@ function Board() {
     setHistoryBoard(position);
   }
 
+  const handleFlipBoard = (e? : React.BaseSyntheticEvent) => {
+    e?.preventDefault();
+
+    setBoardFlip(boardFlip === "white" ? "black" : "white");    
+  }
+
   return (
     <div className={styles.container}>
       <div>
         <button onClick={handleRestart}>Restart</button>
+        <button onClick={handleFlipBoard}>Flip board</button>
       </div>
       <div>
         <p>Turn: {currentTurn}</p>
@@ -371,12 +386,12 @@ function Board() {
         />
       </div>
       <div>
-        <button onClick={goNext}>Next</button>
-        <button onClick={goPrevious}>Previous</button>
+        <button onClick={handleGoNext}>Next</button>
+        <button onClick={handleGoPrevious}>Previous</button>
         <select
           name="variations"
           value={activeLineIndex}
-          onChange={(e) => selectLine(history, initialBoard, activeLineIndex, Number(e.target.value), historyIndex)}>
+          onChange={(e) => handleSelectLine(history, initialBoard, activeLineIndex, Number(e.target.value), historyIndex)}>
           {(() => {
             const currentMove = history[activeLineIndex].moves[historyIndex];
 
