@@ -1,12 +1,23 @@
 import Board from "../../components/board/Board";
 import styles from "./Home.module.css";
 import { useState } from "react";
+import { messageStore } from "../../stores";
 
 function Home() {
   const [side, setSide] = useState<"white" | "black">("white");
+  const message = messageStore();
 
   return (
     <div className={styles.container}>
+      <div>
+        {
+          message.text !== ""
+          ? <div>
+            <p>{message.text}</p>
+          </div>
+          : <></>
+        }
+      </div>
       <div>
         <h2>Choose a side</h2>
         <label htmlFor="white-side">White</label>

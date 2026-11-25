@@ -1,5 +1,7 @@
 import { chessTypes } from "../types";
 import { chessEngine } from ".";
+import { messageStore } from "../stores";
+import { AppError } from "./appError";
 
 const convertColumnToFile = (col: number): string => {
     const abc = "abcdefgh";
@@ -210,7 +212,8 @@ const notationToMove = (notation: string, color: "white" | "black", board: chess
                 break;
 
             default:
-                throw new Error(`invalid promotion ${notation}`);
+                messageStore.getState().setText(`invalid promotion ${notation}`)
+                throw new AppError(`invalid promotion ${notation}`);
         }
     }
 
@@ -296,14 +299,16 @@ const notationToMove = (notation: string, color: "white" | "black", board: chess
         }
         
         if (matchingMoves.length !== 1) {
-            throw new Error(`Could not uniquely identify ${notation}`);
+            messageStore.getState().setText(`Could not uniquely identify ${notation}`)
+            throw new AppError(`Could not uniquely identify ${notation}`);
         }
 
         move = matchingMoves[0];
     }
     
     if (move === null) {
-        throw new Error(`Could not uniquely identify ${notation}`);
+        messageStore.getState().setText(`Could not uniquely identify ${notation}`)
+        throw new AppError(`Could not uniquely identify ${notation}`);
     }
 
     const result = chessEngine.applyMove(board, move, enPassantTarget, promotion, castlingRights);

@@ -1,4 +1,6 @@
 import { chessTypes } from "../types";
+import { messageStore } from "../stores";
+import { AppError } from "./appError";
 
 const ROOK_DIRECTIONS = [
     [-1, 0], [1, 0], [0, -1], [0, 1],
@@ -170,7 +172,8 @@ const findKing = (board: chessTypes.Piece[][], color: "white" | "black") => {
         }
     }
 
-    throw new Error(color + "King not found");
+    messageStore.getState().setText(color + "king not found")
+    throw new AppError(color + "King not found");
 }
 
 const isSquareAttacked = (board: chessTypes.Piece[][], row: number, col: number, byColor: "white" | "black"): boolean => {
