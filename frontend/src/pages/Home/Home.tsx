@@ -55,7 +55,10 @@ function Home() {
         }
       </div>
       <div>
-        <Board/>
+        <Board
+          key={side}
+          side={side}
+        />
       </div>
     </div>
   )

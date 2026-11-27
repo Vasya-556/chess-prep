@@ -160,7 +160,7 @@ const moveToNotation = (move: chessTypes.Move, status: string | null, position: 
     return result;
 }
 
-const notationToMove = (notation: string, color: "white" | "black", board: chessTypes.Piece[][], enPassantTarget: [number, number] | null, promotion: "queen" | "rook" | "bishop" | "knight", castlingRights: { whiteKingMoved: boolean; blackKingMoved: boolean; whiteKingSide: boolean; whiteQueenSide: boolean; blackKingSide: boolean; blackQueenSide: boolean }): { move: chessTypes.Move, board: chessTypes.Piece[][]} => {
+const notationToMove = (notation: string, color: "white" | "black", board: chessTypes.Piece[][], enPassantTarget: [number, number] | null, promotion: "queen" | "rook" | "bishop" | "knight", castlingRights: chessTypes.CastlingRights): { move: chessTypes.Move, board: chessTypes.Piece[][]} => {
     const isWhiteTurn = color === "white";
 
     const notation1 = notation.replace("+", "");
@@ -324,7 +324,7 @@ const notationToMove = (notation: string, color: "white" | "black", board: chess
     }
 }
 
-const PGNParser = (notation: string, enPassantTarget: [number, number] | null, promotion: "queen" | "rook" | "bishop" | "knight", castlingRights: { whiteKingMoved: boolean; blackKingMoved: boolean; whiteKingSide: boolean; whiteQueenSide: boolean; blackKingSide: boolean; blackQueenSide: boolean }): chessTypes.Move[][] => {
+const PGNParser = (notation: string, enPassantTarget: [number, number] | null, promotion: "queen" | "rook" | "bishop" | "knight", castlingRights: chessTypes.CastlingRights): chessTypes.Move[][] => {
     // replace tags, comments, score, result
     notation = notation.replaceAll(/\{[\s\S]*?\}/g, "");
     notation = notation.replaceAll(/\[[\s\S]*?\]/g, "");
@@ -442,7 +442,7 @@ const PGNParser = (notation: string, enPassantTarget: [number, number] | null, p
     return result;
 };
 
-const buildHistory = (moveSet: chessTypes.Move[][], initialBoard: chessTypes.Piece[][], enPassantTarget: [number, number] | null, promotion: "queen" | "rook" | "bishop" | "knight", castlingRights: { whiteKingMoved: boolean; blackKingMoved: boolean; whiteKingSide: boolean; whiteQueenSide: boolean; blackKingSide: boolean; blackQueenSide: boolean }) => {
+const buildHistory = (moveSet: chessTypes.Move[][], initialBoard: chessTypes.Piece[][], enPassantTarget: [number, number] | null, promotion: "queen" | "rook" | "bishop" | "knight", castlingRights: chessTypes.CastlingRights) => {
     const historyLines: chessTypes.HistoryLine[] = [];
     const initEnPassantTarget = enPassantTarget;
     const initCastlingRgihts = { ...castlingRights };
