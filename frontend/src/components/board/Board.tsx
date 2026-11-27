@@ -3,6 +3,7 @@ import {
   useState,
   useRef,
   useMemo,
+  useEffect,
 } from "react"
 import { appConfig } from "../../configs";
 import londonSystem from "../../data/chessbook-london-1400-1600.pgn?raw";
@@ -11,8 +12,14 @@ import {
   chessEngine,
   chessHistory,
  } from "../../utils";
+import chessAiWorker from "../../workers/chessAi.worker?worker";
+import { messageStore } from "../../stores";
 
-function Board() {
+type BoardProps = {
+  side: "white" | "black"
+}
+
+function Board({ side }: BoardProps) {
   const [board, setBoard] = useState<chessTypes.Piece[][]>(() => chessEngine.generateBoard());
   const [currentTurn, setCurrentTurn] = useState<"white" | "black">("white");
   const [gameStatus, setGameStatus] = useState<"check" | "checkmate" | "stalemate" | null>(null);
@@ -23,7 +30,8 @@ function Board() {
   const initialBoard = useMemo(() => chessEngine.generateBoard(), []);
   const [activeLineIndex, setActiveLineIndex] = useState<number>(0);
   const [historyBoard, setHistoryBoard] = useState<chessTypes.Piece[][]>(initialBoard);
-  const [boardFlip, setBoardFlip] = useState<"white" | "black">("white");
+  const [boardFlip, setBoardFlip] = useState<"white" | "black">(side);
+  const [depth, setDepth] = useState<number>(1);
   const enPassantTarget = useRef<[number, number] | null>(null);
   const castlingRights = useRef({
     whiteKingMoved: false,
@@ -48,6 +56,8 @@ function Board() {
     
     return chessHistory.buildHistory(moveSet, initialBoard, initialEnPassantTarget, promotion, { ...initialCastlingRights });
   });
+  const chessAiWorkerRef = useRef<Worker | null>(null);
+  const message = messageStore();
 
   const displayBoard = (board: chessTypes.Piece[][]) => {
     const result = [];
@@ -123,6 +133,10 @@ function Board() {
   }
 
   const handleSquareClick = (row: number, col: number) => {
+    if (currentTurn !== side){
+      return;
+    }
+
     const selectedPiece: chessTypes.Piece = board[row][col];
     
     if (selectedSquare !== null){
@@ -174,9 +188,10 @@ function Board() {
       return;
     }
 
-    const { newBoard } = chessEngine.applyMove(board, requestedMove, enPassantTarget.current, promotion, castlingRights.current);
-    const status = chessEngine.getGameStatus(newBoard, currentTurn === "white" ? "black" : "white", enPassantTarget.current, promotion, castlingRights.current);
+    const { newBoard, newEnPassantTarget } = chessEngine.applyMove(board, requestedMove, enPassantTarget.current, promotion, castlingRights.current);
+    const status = chessEngine.getGameStatus(newBoard, currentTurn === "white" ? "black" : "white", newEnPassantTarget, promotion, castlingRights.current);
     
+    enPassantTarget.current = newEnPassantTarget;
     setBoard(newBoard);
     setCurrentTurn(currentTurn === "white" ? "black" : "white");
     setGameStatus(status);
@@ -337,11 +352,66 @@ function Board() {
     setBoardFlip(boardFlip === "white" ? "black" : "white");    
   }
 
+  const aiMove = () => {
+    if (gameStatus === "checkmate" || gameStatus === "stalemate") {
+      return;
+    }
+
+    if (currentTurn === side) {
+      return;
+    }
+
+    const worker = chessAiWorkerRef.current;
+
+    if (worker === null) {
+      return;
+    }
+
+    worker.onmessage = (event) => {
+      if (event.data.bestMove) {
+        executeMove(event.data.bestMove);
+      }
+    }
+
+    worker.onerror = (event) => {
+      message.setText(event.message)
+    }
+
+    worker.postMessage({
+      depth, board, enPassantTarget: enPassantTarget.current, promotion, castlingRights: castlingRights.current, currentTurn
+    })
+  }
+
+  useEffect(() => {
+    chessAiWorkerRef.current = new chessAiWorker();
+
+    return () => {
+      if (chessAiWorkerRef.current !== null) {
+        chessAiWorkerRef.current.terminate();
+        chessAiWorkerRef.current = null;
+      }
+    }
+  }, []);
+  
+  useEffect(() => {
+    if (currentTurn !== side) {
+      aiMove();
+    }
+  }, [currentTurn, gameStatus, side]);
+
   return (
     <div className={styles.container}>
       <div>
         <button onClick={handleRestart}>Restart</button>
         <button onClick={handleFlipBoard}>Flip board</button>
+        <label>Depth</label>
+        <input 
+          type="range"
+          min={1}
+          max={5}
+          value={depth}
+          onChange={(e) => setDepth(Number(e.target.value))}
+        ></input>
       </div>
       <div>
         <p>Turn: {currentTurn}</p>

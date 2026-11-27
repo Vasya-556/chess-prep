@@ -241,7 +241,7 @@ const isSquareAttacked = (board: chessTypes.Piece[][], row: number, col: number,
     return false;
 }
 
-const getLegalMoves = (board: chessTypes.Piece[][], row: number, col: number, enPassantTarget: [number, number] | null, promotion: "queen" | "rook" | "bishop" | "knight", castlingRights: { whiteKingMoved: boolean; blackKingMoved: boolean; whiteKingSide: boolean; whiteQueenSide: boolean; blackKingSide: boolean; blackQueenSide: boolean }) => {
+const getLegalMoves = (board: chessTypes.Piece[][], row: number, col: number, enPassantTarget: [number, number] | null, promotion: "queen" | "rook" | "bishop" | "knight", castlingRights: chessTypes.CastlingRights) => {
     const piece = board[row][col];
 
     if (piece.type === "none") {
@@ -336,7 +336,7 @@ const isInCheck = (board: chessTypes.Piece[][], color: "white" | "black"): boole
     return isSquareAttacked(board, kingRow, kingCol, color === "white" ? "black" : "white");
 }
 
-const hasLegalMoves = (board: chessTypes.Piece[][], color: "white" | "black", enPassantTarget: [number, number] | null, promotion: "queen" | "rook" | "bishop" | "knight", castlingRights: { whiteKingMoved: boolean; blackKingMoved: boolean; whiteKingSide: boolean; whiteQueenSide: boolean; blackKingSide: boolean; blackQueenSide: boolean }): boolean => {
+const hasLegalMoves = (board: chessTypes.Piece[][], color: "white" | "black", enPassantTarget: [number, number] | null, promotion: "queen" | "rook" | "bishop" | "knight", castlingRights: chessTypes.CastlingRights): boolean => {
     const moves = [];
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
@@ -355,7 +355,7 @@ const hasLegalMoves = (board: chessTypes.Piece[][], color: "white" | "black", en
     return false;
 }
 
-const getGameStatus = (board: chessTypes.Piece[][], color: "white" | "black", enPassantTarget: [number, number] | null, promotion: "queen" | "rook" | "bishop" | "knight", castlingRights: { whiteKingMoved: boolean; blackKingMoved: boolean; whiteKingSide: boolean; whiteQueenSide: boolean; blackKingSide: boolean; blackQueenSide: boolean }): "check" | "checkmate" | "stalemate" | null => {
+const getGameStatus = (board: chessTypes.Piece[][], color: "white" | "black", enPassantTarget: [number, number] | null, promotion: "queen" | "rook" | "bishop" | "knight", castlingRights: chessTypes.CastlingRights): "check" | "checkmate" | "stalemate" | null => {
     let state: "check" | "checkmate" | "stalemate" | null;
 
     if (isInCheck(board, color)){
@@ -378,7 +378,7 @@ const getGameStatus = (board: chessTypes.Piece[][], color: "white" | "black", en
     return state;
 }
 
-const applyMove = (board: chessTypes.Piece[][], move: chessTypes.Move, enPassantTarget: [number, number] | null, promotion: "queen" | "rook" | "bishop" | "knight", castlingRights: { whiteKingMoved: boolean; blackKingMoved: boolean; whiteKingSide: boolean; whiteQueenSide: boolean; blackKingSide: boolean; blackQueenSide: boolean }) => {
+const applyMove = (board: chessTypes.Piece[][], move: chessTypes.Move, enPassantTarget: [number, number] | null, promotion: "queen" | "rook" | "bishop" | "knight", castlingRights: chessTypes.CastlingRights) => {
     const [fromRow, fromCol] = move.from;
     const [toRow, toCol] = move.to;
 
@@ -442,7 +442,7 @@ const applyMove = (board: chessTypes.Piece[][], move: chessTypes.Move, enPassant
 }
 
 
-const canCastle = (board: chessTypes.Piece[][], color: "white" | "black", side: "queen" | "king", castlingRights: { whiteKingMoved: boolean; blackKingMoved: boolean; whiteKingSide: boolean; whiteQueenSide: boolean; blackKingSide: boolean; blackQueenSide: boolean }): boolean => {
+const canCastle = (board: chessTypes.Piece[][], color: "white" | "black", side: "queen" | "king", castlingRights: chessTypes.CastlingRights): boolean => {
     const row = color === "white" ? 7 : 0;
     const opponent = color === "white" ? "black" : "white";
 
@@ -511,7 +511,7 @@ const canCastle = (board: chessTypes.Piece[][], color: "white" | "black", side: 
     return true;
 }
 
-const getCastlingMoves = (board: chessTypes.Piece[][], color: "white" | "black", castlingRights: { whiteKingMoved: boolean; blackKingMoved: boolean; whiteKingSide: boolean; whiteQueenSide: boolean; blackKingSide: boolean; blackQueenSide: boolean }): chessTypes.Move[] => {
+const getCastlingMoves = (board: chessTypes.Piece[][], color: "white" | "black", castlingRights: chessTypes.CastlingRights): chessTypes.Move[] => {
     const row = color === "white" ? 7 : 0;
     const moves: chessTypes.Move[] = [];
 
@@ -527,7 +527,7 @@ const getCastlingMoves = (board: chessTypes.Piece[][], color: "white" | "black",
     return moves;
 }
 
-const updateCastlingMoves = (move: chessTypes.Move, movingPiece: chessTypes.Piece, capturedPiece: chessTypes.Piece, castlingRights: { whiteKingMoved: boolean; blackKingMoved: boolean; whiteKingSide: boolean; whiteQueenSide: boolean; blackKingSide: boolean; blackQueenSide: boolean }) => {
+const updateCastlingMoves = (move: chessTypes.Move, movingPiece: chessTypes.Piece, capturedPiece: chessTypes.Piece, castlingRights: chessTypes.CastlingRights) => {
     const [fromRow, fromCol] = move.from;
     const [toRow, toCol] = move.to;
 
