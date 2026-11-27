@@ -248,7 +248,7 @@ function Board({ side }: BoardProps) {
 
   const handleGoNext = (e? :React.BaseSyntheticEvent) => {
     e?.preventDefault();
-    
+
     if (historyIndex < history[activeLineIndex].moves.length) {
       const position = getHistoryPosition(history, initialBoard, activeLineIndex, historyIndex + 1);
 
@@ -399,6 +399,50 @@ function Board({ side }: BoardProps) {
     }
   }, [currentTurn, gameStatus, side]);
 
+  useEffect(() => {
+    const handleKeyDown = (e :KeyboardEvent) => {
+      if (e.code === "ArrowLeft") {
+        handleGoPrevious();
+        return;
+      }
+
+      if (e.code === "ArrowRight") {
+        handleGoNext();
+        return;
+      }
+
+      const variations = getAvailableVatiations(history, activeLineIndex, historyIndex);
+      const variationIndexes = [
+        activeLineIndex,
+        ...variations.map(v => {
+          return v.lineIndex;
+        })
+      ]
+
+      variationIndexes.sort((a, b) => {
+        return a - b;
+      });
+
+      const currentIndex = variationIndexes.indexOf(activeLineIndex);
+
+      if (e.code === "ArrowUp") {
+        handleSelectLine(history, initialBoard, activeLineIndex, variationIndexes[currentIndex + 1], historyIndex);
+        return;
+      }
+
+      if (e.code === "ArrowUp") {
+        handleSelectLine(history, initialBoard, activeLineIndex, variationIndexes[currentIndex -1], historyIndex);
+        return;
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [handleGoPrevious, handleGoNext]);
+
   return (
     <div className={styles.container}>
       <div>
@@ -496,7 +540,6 @@ function Board({ side }: BoardProps) {
               </>
             )
           })()}
-
         </select>
       </div>
       <div className={styles.board}>
